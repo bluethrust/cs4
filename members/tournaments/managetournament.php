@@ -97,7 +97,7 @@ if($member->authorizeLogin($_SESSION['btPassword']) && $tournamentObj->select($t
 	
 	if($memberInfo['member_id'] == $tournamentInfo['member_id'] || $memberInfo['rank_id'] == "1" || $tournamentObj->isManager($memberInfo['member_id'])) {
 	
-	
+		$formObj = new Form();
 		switch($pID) {
 			case "manageplayers":
 				include("manageplayers.php");
@@ -151,6 +151,12 @@ if($member->authorizeLogin($_SESSION['btPassword']) && $tournamentObj->select($t
 					<script type='text/javascript'>window.location = '".$MAIN_ROOT."members/console.php?cID=".$cID."';</script>
 				";
 		}
+		
+		
+		if(isset($setupFormArgs)) {
+			include(BASE_DIRECTORY."members/console.form.php");
+		}
+		
 	
 		
 		if(isset($_GET['match'])) {

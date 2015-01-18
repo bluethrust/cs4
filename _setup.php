@@ -15,11 +15,13 @@
 
 // This setup page should not be changed.  Edit _config.php to configure your website.
 
-ini_set('display_errors', 0);
+ini_set('display_errors', 1);
 ini_set('session.use_only_cookies', 1);
 ini_set('session.gc_maxlifetime', 60*60*24*3);
 
-
+if(!isset($prevFolder)) {
+	$prevFolder = "";	
+}
 
 if(get_magic_quotes_gpc() == 1) {
 	foreach($_GET as $key=>$value) { $_GET[$key] = stripslashes($value); }
@@ -71,12 +73,17 @@ $THEME = $websiteInfo['theme'];
 define("THEME", $THEME);
 
 $arrWebsiteLogoURL = parse_url($websiteInfo['logourl']);
-
-
 if(!isset($arrWebsiteLogoURL['scheme']) || $arrWebsiteLogoURL['scheme'] == "") {
 	$websiteInfo['logourl'] = $MAIN_ROOT."themes/".$THEME."/".$websiteInfo['logourl'];
 }
 
+// Default websiteinfo values
+include_once(BASE_DIRECTORY."include/websiteinfo_defaults.php");
+
+
+if(!isset($_SESSION['appendIP'])) {
+	$_SESSION['appendIP'] = substr(md5(uniqid().time()),0,10);
+}
 
 $IP_ADDRESS = $_SERVER['REMOTE_ADDR'];
 
@@ -87,7 +94,7 @@ if($websiteInfo['debugmode'] == 1) {
 	ini_set('error_reporting', E_ALL & ~E_NOTICE & ~E_WARNING & ~E_STRICT);
 }
 else {
-	ini_set('display_errors', 1);
+	ini_set('display_errors', 0);
 	ini_set('error_reporting', E_ALL & ~E_NOTICE & ~E_WARNING & ~E_STRICT);
 	//ini_set('error_reporting', E_ALL);
 }
@@ -100,9 +107,6 @@ if($ipbanObj->isBanned($IP_ADDRESS)) {
 	die("<script type='text/javascript'>window.location = '".$MAIN_ROOT."banned.php';</script>");
 }
 
-
-$websiteInfo['default_timezone'] = (!isset($websiteInfo['default_timezone']) || $websiteInfo['default_timezone'] == "") ? "UTC" : $websiteInfo['default_timezone'];
-
 date_default_timezone_set($websiteInfo['default_timezone']);
 
 
@@ -112,6 +116,7 @@ $clockObj = new Clock($mysqli);
 $btThemeObj->setThemeDir($THEME);
 $btThemeObj->setClanName($CLAN_NAME);
 $btThemeObj->initHead();
+$breadcrumbObj = new BreadCrumb();
 
 include_once(BASE_DIRECTORY."plugins/mods.php");
 ?>

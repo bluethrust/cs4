@@ -17,6 +17,7 @@
 $prevFolder = "../";
 
 include($prevFolder."_setup.php");
+$btThemeObj->addHeadItem("richtexteditor1", "<script type='text/javascript' src='".$MAIN_ROOT."js/ckeditor/ckeditor.js'></script>");
 
 $consoleObj = new ConsoleOption($mysqli);
 $boardObj = new ForumBoard($mysqli);
@@ -38,21 +39,6 @@ $attachmentObj = new Download($mysqli);
 $downloadCatObj->selectBySpecialKey("forumattachments");
 
 $moveTopicCID = $consoleObj->findConsoleIDByName("Move Topic");
-
-$ipbanObj = new Basic($mysqli, "ipban", "ipaddress");
-
-if($ipbanObj->select($IP_ADDRESS, false)) {
-	$ipbanInfo = $ipbanObj->get_info();
-
-	if(time() < $ipbanInfo['exptime'] OR $ipbanInfo['exptime'] == 0) {
-		die("<script type='text/javascript'>window.location = '".$MAIN_ROOT."banned.php';</script>");
-	}
-	else {
-		$ipbanObj->delete();
-	}
-
-}
-
 
 if(!$boardObj->objTopic->select($_GET['tID'])) {
 	echo "
@@ -110,7 +96,7 @@ if($member->select($_SESSION['btUsername']) && $member->authorizeLogin($_SESSION
 	$LOGGED_IN = true;
 	$NUM_PER_PAGE = $memberInfo['postsperpage'];
 	
-	if(!$member->hasSeenTopic($topicInfo['forumtopic_id']) && ($lastPostInfo['dateposted']+(60*60*24*7)) > time()) {
+	if(!$member->hasSeenTopic($topicInfo['forumtopic_id'])) {
 		$mysqli->query("INSERT INTO ".$dbprefix."forum_topicseen (member_id, forumtopic_id) VALUES ('".$memberInfo['member_id']."', '".$topicInfo['forumtopic_id']."')");
 	}
 

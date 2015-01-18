@@ -332,7 +332,13 @@ foreach($arrPageTopics as $postID) {
 	
 	$dispTopicIconsIMG = "";
 	$newTopicBG = "";
-	if($LOGGED_IN && !$member->hasSeenTopic($topicInfo['forumtopic_id']) && ($lastPostInfo['dateposted']+(60*60*24*7)) > time()) {
+	
+	$showNewTopic = true;
+	if($websiteInfo['forum_newindicator'] != 0) {
+		$showNewTopic = ($lastPostInfo['dateposted']+(60*60*24*$websiteInfo['forum_newindicator'])) > time();
+	}
+	
+	if($LOGGED_IN && !$member->hasSeenTopic($topicInfo['forumtopic_id']) && $showNewTopic) {
 		$newTopicBG = " boardNewPostBG";
 		$dispTopicIconsIMG = " <img style='margin-left: 5px' src='".$MAIN_ROOT."themes/".$THEME."/images/forum-new.png' title='New Posts!'>";
 	}

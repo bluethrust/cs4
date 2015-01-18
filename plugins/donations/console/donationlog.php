@@ -14,12 +14,12 @@
 
 	
 	$addToPageSelectorLink = "";
-	if(!isset($_GET['start']) || !isset($_GET['end']) || !is_numeric($_GET['start']) || !is_numeric($_GET['end'])) {
+	if(!isset($_GET['start']) || !isset($_GET['end'])) {
 		$period = $campaignObj->getCurrentPeriodRange(true);
 		$_GET['start'] = $period['current'];
 		$_GET['end'] = $period['next']-(60*60*24);
 	}
-	elseif($_GET['start'] > $_GET['end']) {
+	elseif(is_numeric($_GET['start']) && is_numeric($_GET['end']) && $_GET['start'] > $_GET['end']) {
 		$temp = $_GET['start'];
 		$_GET['start'] = $_GET['end'];
 		$_GET['end'] = $temp;

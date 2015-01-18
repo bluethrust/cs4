@@ -36,6 +36,7 @@
 		
 	}
 	
+	
 	//$hooksObj->addHook("form_richtexteditor", "replaceRichTextEditor");
 	
 ?>

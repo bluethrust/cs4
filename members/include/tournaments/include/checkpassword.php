@@ -14,8 +14,6 @@
 
 
 include_once("../../../../_setup.php");
-include_once("../../../../classes/member.php");
-include_once("../../../../classes/tournament.php");
 
 
 // Start Page

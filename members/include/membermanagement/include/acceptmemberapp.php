@@ -14,10 +14,6 @@
  */
 
 include_once("../../../../_setup.php");
-include_once("../../../../classes/member.php");
-include_once("../../../../classes/basic.php");
-include_once("../../../../classes/rank.php");
-
 
 $consoleObj = new ConsoleOption($mysqli);
 $member = new Member($mysqli);
@@ -35,7 +31,19 @@ if($member->authorizeLogin($_SESSION['btPassword']) && $member->hasAccess($conso
 	
 	$arrMemAppInfo = $memberAppObj->get_info_filtered();
 	
-	if($memberAppObj->addMember()) {
+	
+	include_once(BASE_DIRECTORY."members/include/membermanagement/include/memberapp_setrank.php");
+	
+	$newRankID = 2;
+	$setRankOptions = memberAppSetRank();
+	if(count($setRankOptions) > 0) {
+		$allowedRanks = array_keys($setRankOptions['setrank']['options']);
+		if(in_array($_POST['newRank'], $allowedRanks)) {
+			$newRankID = $_POST['newRank'];
+		}
+	}
+	
+	if($memberAppObj->addMember($newRankID)) {
 		
 		$newMemberInfo = $memberAppObj->getNewMemberInfo();
 		$dispNewMember = $newMemberInfo['username'];

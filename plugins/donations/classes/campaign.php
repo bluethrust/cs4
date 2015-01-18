@@ -88,8 +88,7 @@
 			elseif($this->intTableKeyValue != "" && $this->arrObjInfo['currentperiod'] == 0) {
 				// Default Prior 30 days range
 				$x30Days = 60*60*24*30;
-				
-				$returnVal = (!$returnTimestamps) ? array() : array("current" => (time()-$x30Days), "next" => time());
+				$returnVal = (!$returnTimestamps) ? array() : array("current" => 0, "next" => time());
 				
 			}
 			
@@ -153,7 +152,7 @@
 				
 				$addSQL = (count($arrPeriod) == 0 || $total) ? "" : " AND datesent >= '".$sqlCurrentPeriod."' AND datesent < '".$sqlNextPeriod."'";
 				
-				$result = $this->MySQL->query("SELECT * FROM ".$this->MySQL->get_tablePrefix()."donations WHERE donationcampaign_id = '".$this->intTableKeyValue."' ".$addSQL."ORDER BY datesent DESC");
+				$result = $this->MySQL->query("SELECT * FROM ".$this->MySQL->get_tablePrefix()."donations WHERE donationcampaign_id = '".$this->intTableKeyValue."' ".$addSQL." GROUP BY transaction_id ORDER BY datesent DESC");
 				while($row = $result->fetch_assoc()) {
 					$donationInfo[] = filterArray($row);
 					$totalDonationAmount += $row['amount'];	
@@ -190,7 +189,7 @@
 					
 				}
 				
-				$result = $this->MySQL->query("SELECT * FROM ".$this->MySQL->get_tablePrefix()."donations WHERE donationcampaign_id = '".$this->intTableKeyValue."'".$addSQL." ORDER BY datesent DESC");
+				$result = $this->MySQL->query("SELECT * FROM ".$this->MySQL->get_tablePrefix()."donations WHERE donationcampaign_id = '".$this->intTableKeyValue."'".$addSQL." GROUP BY transaction_id ORDER BY datesent DESC");
 				while($row = $result->fetch_assoc()) {
 					$returnVal[] = $row;	
 				}

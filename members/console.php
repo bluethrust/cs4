@@ -61,6 +61,8 @@ $arrAceEditorPages = array("Modify Current Theme", "Add Menu Category", "Add Men
 
 if(in_array($consoleInfo['pagetitle'], $arrTinyMCEPages)) {
 	$btThemeObj->addHeadItem("richtexteditor", "<script type='text/javascript' src='".$MAIN_ROOT."js/tiny_mce/jquery.tinymce.js'></script>");
+	$btThemeObj->addHeadItem("richtexteditor1", "<script type='text/javascript' src='".$MAIN_ROOT."js/ckeditor/ckeditor.js'></script>");
+
 }
 
 if(in_array($consoleInfo['pagetitle'], $arrAceEditorPages)) {

@@ -211,7 +211,9 @@ echo "
 		</div>
 	
 		<div class='tournamentProfileRight'>
-	
+			<p align='center'>
+				picture
+			</p>
 		";
 
 		

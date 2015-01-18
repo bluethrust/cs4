@@ -84,11 +84,23 @@ function getPreciseTime($intTime, $timeFormat="", $bypassTimeDiff=false) {
 
 
 		$dispLastDate = date($timeFormat, $intTime);
+		
 	}
 
 	return $dispLastDate;
 
 }
+
+function getDateUTC($time, $timeFormat = "D M j, Y g:i a") {
+	
+	$date = new DateTime();
+	$date->setTimezone(new DateTimeZone("UTC"));
+	$date->setTimestamp($time);
+	
+	return $date->format($timeFormat);
+	
+}
+
 
 function parseBBCode($strText) {
 global $MAIN_ROOT;
@@ -158,9 +170,10 @@ global $MAIN_ROOT;
 function autoLinkImage($strText) {
 
 	$strText = preg_replace("/<img src=(\"|\')(.*)(\"|\')>/", "<a href='$2' target='_blank'><img src='$2'></a>", $strText);
+	$strText = preg_replace("/<img src=(\"|\')(.*)(\"|\') alt=(\"|\')(.*)(\"|\') width=(\"|\')(.*)(\"|\') height=(\"|\')(.*)(\"|\') \/>/", "<a href='$2' target='_blank'><img src='$2' width='$8' height='$11'></a>", $strText);
 	$strText = preg_replace("/<img src=(\"|\')(.*)(\"|\') alt=(\"|\')(.*)(\"|\') \/>/", "<a href='$2' target='_blank'><img src='$2'></a>", $strText);
 	
-	
+	 
 	return $strText;
 }
 
@@ -176,7 +189,8 @@ function deleteFile($filename) {
 
 
 function getHTTP() {
-	if(isset($_SERVER['HTTPS']) && (trim($_SERVER['HTTPS']) == "" || $_SERVER['HTTPS'] == "off")) {
+
+	if(!isset($_SERVER['HTTPS']) || (isset($_SERVER['HTTPS']) && (trim($_SERVER['HTTPS']) == "" || $_SERVER['HTTPS'] == "off"))) {
 		$dispHTTP = "http://";
 	}
 	else {
@@ -242,14 +256,27 @@ function encryptPassword($password) {
 	return $returnArr;
 }
 
+function getSelected($arrValues, $selectedValue) {
+	$returnArr = array();
+	foreach($arrValues as $value) {
+		$returnArr[$value] = ($value == $selectedValue) ? " selected" : "";
+	}
+	return $returnArr;
+}
+
 
 // Class Loaders
 
 function BTCS4Loader($class_name) {
-	include_once(BASE_DIRECTORY."classes/".strtolower($class_name).".php");
+	if(file_exists(BASE_DIRECTORY."classes/".strtolower($class_name).".php")) {
+		include_once(BASE_DIRECTORY."classes/".strtolower($class_name).".php");
+	}
+	elseif(file_exists(include_once(BASE_DIRECTORY."classes/formcomponents/".strtolower($class_name).".php"))) {
+		include_once(BASE_DIRECTORY."classes/formcomponents/".strtolower($class_name).".php");
+	}
 }
 
-spl_autoload_register("BTCS4Loader", true, true);
+//spl_autoload_register("BTCS4Loader", true, true);
 
 include_once(BASE_DIRECTORY."include/phpmailer/PHPMailerAutoload.php");
 ?>

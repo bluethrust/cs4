@@ -132,8 +132,8 @@ if($websiteInfo['newsticker'] != "") {
 	}
 	$setMarqueeTickerStyle = "";
 	if($websiteInfo['newstickersize'] != 0) {
-		$setNewsTickerStyle .= "; font-size: ".$websiteInfo['newstickersize']."px; height: ".$websiteInfo['newstickersize']."px;";
-		$setMarqueeTickerStyle = " style ='height: ".($websiteInfo['newstickersize']+5)."px;'";
+		$setNewsTickerStyle .= "; font-size: ".$websiteInfo['newstickersize']."px; height: ".($websiteInfo['newstickersize']+15)."px;";
+		$setMarqueeTickerStyle = " style ='height: ".($websiteInfo['newstickersize']+15)."px;'";
 	}
 	
 	if($websiteInfo['newstickerbold'] == 1) {
@@ -148,7 +148,7 @@ if($websiteInfo['newsticker'] != "") {
 	echo "
 	
 
-			<div id='hpNewsTicker'>
+			<div id='hpNewsTicker'".$setMarqueeTickerStyle.">
 			
 				<marquee scrollamount='3'".$setMarqueeTickerStyle."><div id='tickerSpan' style='".$setNewsTickerStyle." position: relative; margin-left: auto; margin-right: auto;'>".$websiteInfo['newsticker']."</div></marquee>
 			

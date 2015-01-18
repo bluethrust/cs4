@@ -13,28 +13,7 @@
  */
 
 include_once("../../_setup.php");
-include_once("../../classes/member.php");
-include_once("../../classes/rank.php");
-include_once("../../classes/rankcategory.php");
-include_once("../../classes/squad.php");
-include_once("../../classes/tournament.php");
-include_once("../../classes/privatemessage.php");
-include_once("../../classes/pmfolder.php");
 
-
-$ipbanObj = new Basic($mysqli, "ipban", "ipaddress");
-
-if($ipbanObj->select($IP_ADDRESS, false)) {
-	$ipbanInfo = $ipbanObj->get_info();
-
-	if(time() < $ipbanInfo['exptime'] OR $ipbanInfo['exptime'] == 0) {
-		die("<script type='text/javascript'>window.location = '".$MAIN_ROOT."banned.php';</script>");
-	}
-	else {
-		$ipbanObj->delete();
-	}
-
-}
 
 
 // Start Page
@@ -58,13 +37,16 @@ $EXTERNAL_JAVASCRIPT .= "
 <script type='text/javascript' src='".$MAIN_ROOT."members/js/main.js'></script>
 ";
 
-include("../../themes/".$THEME."/_header.php");
-echo "
-<div class='breadCrumbTitle' id='breadCrumbTitle'>View Message</div>
-<div class='breadCrumb' id='breadCrumb' style='padding-top: 0px; margin-top: 0px'>
-$dispBreadCrumb
-</div>
-";
+include(BASE_DIRECTORY."themes/".$THEME."/_header.php");
+
+
+$breadcrumbObj->setTitle("View Message");
+$breadcrumbObj->addCrumb("Home", MAIN_ROOT);
+$breadcrumbObj->addCrumb("My Account", MAIN_ROOT."members");
+$breadcrumbObj->addCrumb($consoleTitle, MAIN_ROOT."members/console.php?cID=".$cID);
+$breadcrumbObj->addCrumb("View Message");
+include(BASE_DIRECTORY."include/breadcrumb.php");
+
 
 $pmObj = new PrivateMessage($mysqli);
 $multiMemPMObj = $pmObj->multiMemPMObj;

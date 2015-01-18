@@ -1,6 +1,6 @@
 <?php
 
-	if(!defined("SHOW_FORUMPOST")) {
+	if(!defined("MAIN_ROOT")) {
 		exit();	
 	}
 
@@ -176,6 +176,11 @@
 		}
 		
 		if(LOGGED_IN && $topicInfo['lockstatus'] == 0) { 
+			
+			if($showReplyLink) {
+				echo "&raquo; <a href='".$MAIN_ROOT."members/console.php?cID=".$intPostTopicCID."&bID=".$topicInfo['forumboard_id']."&tID=".$topicInfo['forumtopic_id']."'>POST REPLY</a> &laquo;&nbsp&nbsp;&nbsp;";	
+			}
+			
 			echo "&raquo; <a href='".$MAIN_ROOT."members/console.php?cID=".$intPostTopicCID."&bID=".$topicInfo['forumboard_id']."&tID=".$topicInfo['forumtopic_id']."&quote=".$postInfo['forumpost_id']."'>QUOTE</a> &laquo;"; 
 		}
 		

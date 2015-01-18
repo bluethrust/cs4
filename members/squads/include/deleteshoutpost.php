@@ -57,7 +57,7 @@ if($member->authorizeLogin($_SESSION['btPassword']) && $member->hasAccess($conso
 
 $squadMemberList = $squadObj->getMemberList();
 $blnShowShoutBox = false;
-if(in_array($memberInfo['member_id'], $squadMemberList) && $squadInfo['privateshoutbox'] == 1) {
+if((in_array($memberInfo['member_id'], $squadMemberList) && $squadInfo['privateshoutbox'] == 1) || $memberInfo['rank_id'] == 1) {
 	$blnShowShoutBox = true;
 }
 elseif($squadInfo['privateshoutbox'] == 0) {

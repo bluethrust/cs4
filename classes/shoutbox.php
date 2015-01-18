@@ -49,6 +49,9 @@ class ShoutBox {
 	
 	public function dispShoutbox($setWidth=0, $setHeight=0, $blnPercentWidth=false, $txtBoxWidth=0, $blnPercentHeight=false) {
 		global $MAIN_ROOT, $THEME;
+		
+
+		
 		if($setWidth > 0) {
 			$this->intDispWidth = $setWidth;
 		}
@@ -68,7 +71,8 @@ class ShoutBox {
 			$dispHeightPX = "%";
 		}
 		
-		$result = $this->MySQL->query("SELECT * FROM ".$this->strTableName." WHERE newstype = '3'".$this->strSQLSort." ORDER BY dateposted");
+		$query = "SELECT * FROM ".$this->strTableName." WHERE newstype = '3'".$this->strSQLSort." ORDER BY dateposted";
+		$result = $this->MySQL->query($query);
 		while($row = $result->fetch_assoc()) {
 			
 			
@@ -95,7 +99,6 @@ class ShoutBox {
 			
 		}
 
-		
 		$addToReturn = "";
 		$addToReturn2 = "";		
 		

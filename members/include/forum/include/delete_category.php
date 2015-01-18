@@ -14,8 +14,6 @@
 
 
 include("../../../../_setup.php");
-include_once("../../../../classes/member.php");
-
 
 $member = new Member($mysqli);
 $member->select($_SESSION['btUsername']);

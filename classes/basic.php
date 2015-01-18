@@ -77,7 +77,7 @@ class Basic {
 	 */
 	
 	public function selectByMulti($arrWhats) {
-		
+
 		$returnVal = false;
 		if(is_array($arrWhats)) {
 			
@@ -89,22 +89,24 @@ class Basic {
 			$setSQL = implode(" AND ", $arrSQL);
 
 			$query = "SELECT ".$this->strTableKey." FROM ".$this->strTableName." WHERE ".$setSQL;
+			
 			$stmt = $this->MySQL->prepare($query);
 			$returnID = "";
 
 			if($stmt) {
-	
 				$this->MySQL->bindParams($stmt, $arrWhats);
 				$stmt->execute();
 				$stmt->bind_result($result);
-				$stmt->fetch();	
+				$stmt->fetch();
 				$returnID = $result;			
 				$stmt->close();
 
+				
 			}
 		
 			
 
+			
 			$returnVal = $this->select($returnID);	
 			
 			

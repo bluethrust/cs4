@@ -84,7 +84,7 @@ echo "
 <form action='forgotpassword.php?stage=send' method='post'>
 	<input type='hidden' name='validator' value='20473833234' />
 	<div class='formDiv'>
-		This form will help you in resetting a forgotten password. It will send an email to your accounts registered email address. In that email will be a link you must click. The link will bring you back here and allow you to set a new password.
+		This form will help you in resetting a forgotten password. It will send an email to your account's registered email address. In that email will be a link you must click. The link will bring you back here and allow you to set a new password.
 			<table class='formTable'>
 				<tr>
 					<td class='formLabel'>Username:</td>

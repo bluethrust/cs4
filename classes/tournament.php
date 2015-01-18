@@ -39,7 +39,7 @@ class Tournament extends Basic {
 		$this->strTableName = $this->MySQL->get_tablePrefix()."tournaments";
 		$this->strTableKey = "tournament_id";
 		
-		$this->objPlayer = new Basic($sqlConnection, "tournamentplayers", "tournamentplayer_id");
+		$this->objPlayer = new TournamentPlayer($sqlConnection, $this);//new Basic($sqlConnection, "tournamentplayers", "tournamentplayer_id");
 		$this->objTeam = new Basic($sqlConnection, "tournamentteams", "tournamentteam_id");
 		$this->objMatch = new Basic($sqlConnection, "tournamentmatch", "tournamentmatch_id");
 		$this->objTournamentPool = new TournamentPool($sqlConnection);
@@ -255,6 +255,18 @@ class Tournament extends Basic {
 				
 				$this->resetMatches();
 				
+				
+			}
+			
+			
+			// Check for time change
+			if($arrOriginalInfo['startdate'] != $arrNewInfo['startdate']) {
+
+				//Update reminders
+				foreach($this->getPlayers(true) as $playerID) {
+					$this->objPlayer->select($playerID);
+					$this->objPlayer->setReminder();					
+				}
 				
 			}
 		
@@ -917,6 +929,31 @@ class Tournament extends Basic {
 		
 	}
 	
+	
+	public function addPlayer($memberID) {
+
+		$member = new Member($this->MySQL);
+		
+		if($this->intTableKeyValue != "" && is_numeric($memberID) && $member->select($memberID)) {
+
+			$arrColumns = array("member_id", "tournament_id");
+			$arrValues = array($memberID, $this->intTableKeyValue);
+			
+			$this->objPlayer->addNew($arrColumns, $arrValues);
+			
+			if($this->arrObjInfo['playersperteam'] == 1) {
+
+				$arrUnfilledTeams = $this->getUnfilledTeams();
+				if(count($arrUnfilledTeams) > 0) {
+					$newTeam = $arrUnfilledTeams[0];
+					$this->objPlayer->update(array("team_id"), array($newTeam));
+				}	
+				
+			}
+			
+		}
+		
+	}
 	
 	public function getLink() {
 

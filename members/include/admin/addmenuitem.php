@@ -213,7 +213,7 @@ $arrComponents = array(
 		"sortorder" => $i++,
 		"validate" => array("RESTRICT_TO_OPTIONS"),
 		"db_name" => "accesstype",
-		"options" => array("Always", "Logged In"),
+		"options" => array("Always", "Logged In", "Logged Out"),
 		"attributes" => array("class" => "textBox formInput")
 	),
 	"hide" => array(

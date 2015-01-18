@@ -296,12 +296,16 @@ class Squad extends Basic {
 		$returnVal = false;
 		$intSquadMemberID = $this->getSquadMemberID($memberID);		
 		
+		$member = new Member($this->MySQL);
+		$member->select($memberID);
+		
+		
 		if($this->blnManageAllSquads) {
 			
 			$returnVal = true;
 			
 		}
-		elseif($intSquadMemberID !== false && in_array($privName, $this->arrSquadPrivileges)) {
+		elseif(($intSquadMemberID !== false && in_array($privName, $this->arrSquadPrivileges)) || $member->get_info("rank_id") == 1) {
 			
 			$this->objSquadMember->select($intSquadMemberID);
 			$squadMemberRankID = $this->objSquadMember->get_info("squadrank_id");

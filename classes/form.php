@@ -26,7 +26,6 @@
 		public $saveMessageTitle;
 		public $afterSave;
 		public $saveLink;
-		public $prefillValues = true;
 		public $blnSaveResult;
 		public $beforeAfter = false;
 		public $isContainer = false;
@@ -83,6 +82,7 @@
 			$this->saveAdditional = $args['saveAdditional'];
 			$this->embedJS = $args['embedJS'];
 			$this->attachmentForm = false;
+			$this->prefillValues = isset($args['prefillValues']) ? $args['prefillValues'] : false;
 			
 			if(isset($args['wrapper'])) {
 				$this->wrapper = $args['wrapper'];	
@@ -134,9 +134,11 @@
 				
 				// Output Component Name
 				if($componentInfo['display_name'] != "") {
+					$addValignComponents = array("file", "textarea", "beforeafter", "checkbox");
+					$addVAlign = in_array($componentInfo['type'], $addValignComponents) ? " formVAlignTop" : "";					
 					$dispToolTip = ($componentInfo['tooltip'] != "") ? " <a href='javascript:void(0)' onmouseover=\"showToolTip('".addslashes($componentInfo['tooltip'])."')\" onmouseout='hideToolTip()'>(?)</a>" : "";					
 					$displayForm .= "
-						<label class='formLabel' style='display: inline-block'>".$componentInfo['display_name'].":".$dispToolTip."</label>		
+						<label class='formLabel".$addVAlign."' style='display: inline-block'>".$componentInfo['display_name'].":".$dispToolTip."</label>		
 					";
 				}
 				
@@ -178,21 +180,95 @@
 						$afterJS .= $this->datepickerJS($componentInfo['attributes']['id'], $componentInfo['options']);
 						$displayForm .= "<input type='text' value='".$componentInfo['options']['defaultDate']."' ".$dispAttributes." readonly='readonly'><input type='hidden' id='".$componentInfo['options']['altField']."' name='".$componentName."' value='".$formatDatePick."'>";
 						break;
-					case "select":
-						$displayForm .= "<select name='".$componentName."' ".$dispAttributes.">";
-						foreach($componentInfo['options'] as $optionValue => $displayValue) {
-							$dispSelected = "";
-							if($optionValue == $componentInfo['value']) {
-								$dispSelected = " selected";	
+					case "timepicker":
+						
+						$arrTimezones = DateTimeZone::listIdentifiers();
+						
+						$datePick = new DateTime();
+						$datePick->setTimestamp($componentInfo['value']/1000);
+						$datePick->setTimezone(new DateTimeZone("UTC"));
+
+						$selectedHour = $datePick->format("g");
+						$selectedMinute = $datePick->format("i");
+						$selectedAMPM = $datePick->format("A");
+						
+						
+						$selectPM = ($selectedAMPM == "PM") ? " selected" : "";
+						
+						$displayForm .= "
+							<div class='formInput'>
+								<select name='".$componentName."_hour' ".$dispAttributes.">
+									<option value='0'>12</option>
+								";
+									
+						for($i=1; $i<12; $i++) {
+							$selected = "";
+							if($selectedHour == $i) {
+								$selected = " selected";
 							}
-							
-							if(in_array($optionValue, $componentInfo['non_selectable_items'])) {
-								$dispSelected = " disabled class='disabledSelectItem'";
-							}
-							
-							$displayForm .= "<option value='".$optionValue."'".$dispSelected.">".$displayValue."</option>";	
+							$displayForm .= "<option value='".$i."'".$selected.">".$i."</option>";
 						}
-						$displayForm .= "</select>";
+								
+						$displayForm .= "
+								</select>
+								<select name='".$componentName."_minute' ".$dispAttributes.">
+								";
+						
+						for($i=0; $i<=59; $i++) {
+							$selected = "";
+							
+							$dispMinute = ($i<10) ? "0".$i : $i;
+							if($selectedMinute == $i) {
+								$selected = " selected";
+							}
+							$displayForm .= "<option value='".$i."'".$selected.">".$dispMinute."</option>";
+						}
+						
+						
+						$displayForm .= "
+								</select>
+								<select name='".$componentName."_AMPM' ".$dispAttributes.">
+									<option value='AM'>AM</option><option value='PM'".$selectPM.">PM</option>
+								</select>
+						";		
+						
+						if($componentInfo['options']['show_timezone'] == 1) {
+							$displayForm .= "
+								<select name='".$componentName."_timezone' ".$dispAttributes.">
+									<option value=''>[Use Default]</option>
+								";
+							foreach($arrTimezones as $timeZone) {
+								$tz = new DateTimeZone($timeZone);
+								$dispOffset = ((($tz->getOffset(new DateTime("now", $tz)))/60)/60);
+								$dispSign = ($dispOffset < 0) ? "" : "+";
+								
+								$selected = "";
+								if($componentInfo['options']['selected_timezone'] == $timeZone) {
+									$selected = " selected";
+								}
+								
+								$displayForm .= "<option value='".$timeZone."'".$selected.">".str_replace("_", " ", $timeZone)." (UTC".$dispSign.$dispOffset.")</option>";
+							}
+							
+							$displayForm .= "</select>";
+						}
+						
+						$displayForm .= "
+								
+							</div>
+						";
+						
+						break;
+					case "select":
+						
+						$selectBoxObj = new SelectBox();
+						$selectBoxObj->setComponentName($componentName);
+						$selectBoxObj->setAttributes($componentInfo['attributes']); 
+						$selectBoxObj->setOptions($componentInfo['options']);
+						$selectBoxObj->setComponentValue($componentInfo['value']);
+						$selectBoxObj->setNonSelectableItems($componentInfo['non_selectable_items']);
+						$displayForm .= $selectBoxObj->getHTML();
+						
 						break;
 					case "checkbox": // Checkbox and radio are basically same thing, so checkbox falls through to radio section
 					case "radio":
@@ -328,7 +404,7 @@
 				
 				$displayForm .= $componentInfo['html'];
 				
-				if($componentInfo['type'] != "section") {
+				if($componentInfo['type'] != "section" && !isset($componentInfo['hidden'])) {
 					$displayForm .= "<br>";
 				}
 				
@@ -457,8 +533,10 @@
 								$this->errors[] = ($arrValidate['customMessage'] != "") ? $arrValidate['customMessage'] : $componentInfo['display_name']." may only be a numeric value.";	
 							}
 							elseif($componentInfo['type'] == "datepicker") {
-
 								$checkDate = explode("-", $_POST[$componentName]);
+								if(!is_numeric($checkDate[0]) || !is_numeric($checkDate[1]) || !is_numeric($checkDate[2])) {
+									$this->errors[] = ($arrValidate['customMessage'] != "") ? $arrValidate['customMessage'] : $componentInfo['display_name']." may only be a date value.";	
+								}
 								
 							}
 							break;
@@ -658,6 +736,19 @@
 					$datePick = new DateTime();
 					$datePick->setTimezone(new DateTimeZone("UTC"));
 					$datePick->setDate($formatDate[2], $formatDate[0], $formatDate[1]);
+					
+					if(isset($componentInfo['usetime'])) {
+						$useTimeComponent = $componentInfo['usetime'];	
+						$hour = $useTimeComponent."_hour";
+						$minute = $useTimeComponent."_minute";
+						$amPM = $useTimeComponent."_AMPM";
+						
+						$setHour = ($_POST[$amPM] == "PM") ? $_POST[$hour]+12 : $_POST[$hour];
+						$setMinute = $_POST[$minute];
+												
+						$datePick->setTime($setHour, $setMinute);
+					}
+					
 					$dateTimestamp = $datePick->format("U");
 					
 					$_POST[$componentName] = $dateTimestamp;	
@@ -696,6 +787,7 @@
 			
 			$this->blnSaveResult = false;
 			
+						
 			$arrResortOrder = array();
 			if($this->validate()) {
 
@@ -714,7 +806,6 @@
 					
 				}
 				
-				
 				foreach($this->saveAdditional as $dbName => $dbValue) {
 					$arrColumns[] = $dbName;
 					$arrValues[] = $dbValue;	
@@ -724,7 +815,7 @@
 				if($this->objSave != "" && $this->saveType == "add") {
 					$this->blnSaveResult = $this->objSave->addNew($arrColumns, $arrValues);
 				}
-				elseif($this->objSave != "") {
+				elseif($this->objSave != "" && $this->saveType == "update") {
 					$this->blnSaveResult = $this->objSave->update($arrColumns, $arrValues);
 					
 					
@@ -733,7 +824,11 @@
 							unlink(BASE_DIRECTORY.$file);
 						}
 					}
-					
+						
+				}
+				elseif($this->objSave != "" && $this->saveType != "") {
+					//echo $this->saveType; 
+					$this->blnSaveResult = $this->objSave->{$this->saveType}($arrColumns, $arrValues);
 					
 				}
 				else {
@@ -788,6 +883,28 @@
 			}
 			
 			return $returnVal;
+		}
+		
+		/*
+		 * 
+		 * 
+		 */
+		
+		public function addComponentSortSpace($spaceAmount=2, $components = array()) {
+			
+			if(count($components) > 0) {
+				$this->components = $components;
+			}
+			
+			uasort($this->components, array("Form", "sortForm"));
+			
+			$nextSpot = 1;
+			
+			foreach($this->components as $componentName => $componentInfo) {
+				$this->components[$componentName]['sortorder'] = $nextSpot;
+				$nextSpot += $nextSpot+$spaceAmount;
+			}
+			
 		}
 		
 		/*
@@ -978,11 +1095,12 @@
 		
 		private function datepickerJS($componentID, $componentOptions) {
 			
+			
 			$returnVal = "	
 				$('#".$componentID."').datepicker({
 					changeMonth: ".$componentOptions['changeMonth'].",
 					changeYear: ".$componentOptions['changeYear'].",
-					dateFormat: '".$componentOptions['dateFormate']."',
+					dateFormat: '".$componentOptions['dateFormat']."',
 					minDate: ".$componentOptions['minDate'].",
 					maxDate: ".$componentOptions['maxDate'].",
 					yearRange: '".$componentOptions['yearRange']."',

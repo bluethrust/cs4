@@ -58,12 +58,15 @@ echo "
 	<div id='declineAppDiv' style='display: none'></div>
 	<script type='text/javascript'>
 
-		function acceptApp(intAppID) {
+		function acceptApp(intAppID, newRankID) {
+
+			newRankID = typeof newRankID !== 'undefined' ? newRankID : 0;
+		
 			$(document).ready(function() {
 				
 				$('#loadingSpiral').show();
 				$('#memberApplications').fadeOut(250);
-				$.post('".$MAIN_ROOT."members/include/membermanagement/include/acceptmemberapp.php', { mAppID: intAppID }, function(data) {
+				$.post('".$MAIN_ROOT."members/include/membermanagement/include/acceptmemberapp.php', { mAppID: intAppID, newRank: newRankID }, function(data) {
 					$('#memberApplications').html(data);
 					$('#loadingSpiral').hide();
 					$('#memberApplications').fadeIn(250);

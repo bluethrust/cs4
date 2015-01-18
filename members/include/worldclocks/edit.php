@@ -23,12 +23,19 @@
 	
 	include(BASE_DIRECTORY."members/include/worldclocks/clock_form.php");
 	
+	if(count($arrClocks) == 1) {		
+		$arrClocks['first'] = "(first clock)";
+	}
+	
 	$clockOrder = $clockObj->findBeforeAfter();
 	$clockObj->select($clockInfo['clock_id']);
 	
 	$arrComponents['displayorder']['before_after_value'] = $clockOrder[0];
 	$arrComponents['displayorder']['after_selected'] = $clockOrder[1];
 	$arrComponents['displayorder']['value'] = $clockInfo['clock_id'];
+	$arrComponents['displayorder']['options'] = $arrClocks;
+	$arrComponents['displayorder']['validate'][0]['edit'] = true;
+	
 	$arrComponents['submit']['value'] = "Save";
 	
 	

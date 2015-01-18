@@ -438,14 +438,15 @@ class Member extends Basic {
 		
 	}
 	
-	function sendPM($to, $subject, $message, $replypmID=0, $arrGroups=array()) {
+	function sendPM($to, $subject, $message, $replypmID=0, $arrGroups=array(), $email=false) {
 
 		$returnVal = false;
 		
 		if($this->intTableKeyValue != "") {
 			$pmObj = new Basic($this->MySQL, "privatemessages", "pm_id");
-	
+			$toMemberObj = new Member($this->MySQL);
 			if(is_array($to)) {
+				// Multi Member PM
 				
 				$multiMemPMObj = new Basic($this->MySQL, "privatemessage_members", "pmmember_id");
 				
@@ -455,7 +456,7 @@ class Member extends Basic {
 				if($pmObj->addNew($arrColumns, $arrValues)) {
 					
 					$pmInfo = $pmObj->get_info();
-					
+					$arrBCC = array();
 					$arrColumns = array("pm_id", "member_id", "grouptype", "group_id");
 					foreach($to as $memberID) {
 						
@@ -465,11 +466,25 @@ class Member extends Basic {
 						$arrValues = array($pmInfo['pm_id'], $memberID, $groupType, $groupID);
 						
 						$multiMemPMObj->addNew($arrColumns, $arrValues);
+						$toMemberObj->select($memberID);
+						$emailNotificationPM = $toMemberObj->getEmailNotificationSetting("privatemessage") == 1;
+						$blockedEmailPM = $toMemberObj->getEmailNotificationSetting("email_privatemessage") == 1;
+						if($toMemberObj->get_info("email") != "" && ($emailNotificationPM || ($email && !$blockedEmailPM))) {
+							$arrBCC[] = $toMemberObj->get_info("email");
+						}
 						
 					}
+					
+					if(count(arrBCC) > 0) {
+												
+						$objMail = new btMail();
+						$objMail->sendMail("", $subject, $message, array("from" => $this->arrObjInfo['email'], "bcc" => $arrBCC));
+						
+					}
+					
 					$returnVal = true;
 				}
-
+				
 			}
 			else {
 			
@@ -477,7 +492,11 @@ class Member extends Basic {
 				$arrValues = array($this->intTableKeyValue, $to, time(), $subject, $message, $replypmID);
 				
 				if($pmObj->addNew($arrColumns, $arrValues)) {
-		
+					$toMemberObj->select($to);
+					if($toMemberObj->getEmailNotificationSetting("privatemessage") == 1 || ($email && $toMemberObj->getEmailNotificationSetting("email_privatemessage") == 0)) {
+						$toMemberObj->email($subject, $message, $this->arrObjInfo['email']);
+					}
+					
 					$returnVal = true;
 					
 				}
@@ -831,7 +850,7 @@ class Member extends Basic {
 	 */
 	
 	public function hasSeenTopic($topicID) {
-	
+
 		$returnVal = false;
 
 		if($this->intTableKeyValue != "" && $topicID != "" && is_numeric($topicID)) {
@@ -947,24 +966,13 @@ class Member extends Basic {
 		return $this->getMemberPicture($setWidth, $setHeight, "profilepic", "defaultprofile.png");
 	}
 	
-	public function getEmailNotificationSetting($notificationName, $selectBy = "name") {
+	public function getEmailNotificationSetting($notificationName) {
 
-		$returnVal = true;
-		$emailNotification = new EmailNotification($this->MySQL);
-		if($this->arrObjInfo['email'] != "" && $emailNotification->selectByMulti(array($selectBy => $notificationName))) {
-			$result = $this->MySQL->query("SELECT status FROM ".$this->MySQL->get_tablePrefix()."emailnotifications_members WHERE member_id = '".$this->intTableKeyValue."' AND emailnotification_id = '".$emailNotification->get_info("emailnotification_id")."'");
-			if($result->num_rows > 0) {
-				$row = $result->fetch_assoc();
-				$returnVal = ($row['status'] == 0) ? false : true;
-				
-			}
-			
-		}
-		elseif($this->arrObjInfo['email'] == "") {
-			$returnVal = false;
-		}
-	
-		return $returnVal;	
+		$emailNotificationSetting = new Basic($this->MySQL, "emailnotifications_settings", "emailnotificationsetting_id");
+		
+		$emailNotificationSetting->selectByMulti(array("member_id" => $this->intTableKeyValue));
+		
+		return $emailNotificationSetting->get_info($notificationName);
 		
 	}
 	
@@ -987,6 +995,33 @@ class Member extends Basic {
 		}
 		return $returnVal;
 	}
+	
+	
+	public function setEmailReminder($sendDate, $subject, $message, $updateID=0) {
+
+		$emailReminder = new Basic($this->MySQL, "emailnotifications_queue", "emailnotificationsqueue_id");
+		
+		if($updateID == 0) {
+			$emailReminder->addNew(array("member_id", "senddate", "subject", "message"), array($this->intTableKeyValue, $sendDate, $subject, $message));
+		}
+		else {
+			$emailReminder->select($updateID);
+			$emailReminder->update(array("member_id", "senddate", "subject", "message"), array($this->intTableKeyValue, $sendDate, $subject, $message));
+		}
+		
+		return $emailReminder->get_info("emailnotificationsqueue_id");
+	}
+	
+	public function email($subject, $message, $from="") {
+
+		if($this->arrObjInfo['email'] != "") {
+			$objMail = new btMail();
+			$objMail->sendMail($this->arrObjInfo['email'], $subject, $message, array("from" => $from));
+						
+		}
+		
+	}
+	
 	
 }
 

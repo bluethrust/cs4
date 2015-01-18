@@ -1,3 +1,5 @@
+<?php header('Content-Type: text/html; charset=ISO-8859-15'); ?>
+
 <?php
 
 
@@ -61,6 +63,7 @@ if($member->authorizeLogin($_SESSION['btPassword'])) {
 }
 
 echo $shoutboxObj->dispShoutbox();
+
 
 $checkNewsUpdates = $dbprefix."news_update";
 $result = $mysqli->query("SELECT updatetime FROM ".$dbprefix."tableupdates WHERE tablename = '".$dbprefix."news'");

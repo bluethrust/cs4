@@ -169,9 +169,9 @@ foreach($squadMemberList as $realMemberID) {
 
 asort($arrSquadMembers);
 $counter = 0;
-$blnPost = false;
-$blnManageShoutbox = false;
-$blnManageNewsPost = false;
+$blnPost = ($memberInfo['rank_id'] != 1) ? false : true;
+$blnManageShoutbox = ($memberInfo['rank_id'] != 1) ? false : true;
+$blnManageNewsPost = ($memberInfo['rank_id'] != 1) ? false : true;
 foreach($arrSquadMembers as $key => $sortnum) {
 	// $key = member_id
 	
@@ -256,7 +256,7 @@ foreach($arrSquadMembers as $key => $sortnum) {
 $shoutboxObj = new Shoutbox($mysqli, "squadnews", "squadnews_id");
 
 $shoutboxObj->strDivID = "squadsShoutbox";
-$shoutboxObj->intDispWidth = 95;
+$shoutboxObj->intDispWidth = 90;
 $shoutboxObj->intDispHeight = 400;
 $shoutboxObj->strSQLSort = " AND squad_id ='".$squadInfo['squad_id']."'";
 
@@ -352,10 +352,10 @@ echo "
 				</div>
 			";
 
-			if($squadInfo['privateshoutbox'] == 0 && in_array($memberInfo['member_id'], $squadMemberList)) {
+			if(($squadInfo['privateshoutbox'] == 1 && in_array($memberInfo['member_id'], $squadMemberList)) || $memberInfo['rank_id'] == 1) {
 				echo $dispShoutbox;
 			}
-			elseif($squadInfo['privateshoutbox'] == 1) {
+			elseif($squadInfo['privateshoutbox'] == 0) {
 				echo $dispShoutbox;	
 			}
 				

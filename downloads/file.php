@@ -64,26 +64,38 @@ if($downloadObj->select($_GET['dID'])) {
 		$blnShowDownload = true;	
 	}
 	
-	$fileContents1 = file_get_contents($prevFolder.$downloadInfo['splitfile1']);
-	$fileContents2 = file_get_contents($prevFolder.$downloadInfo['splitfile2']);
 	
-	if($blnShowDownload && $fileContents1 !== false && $fileContents2 !== false) {
+	$fileContents = file_get_contents($prevFolder.$downloadInfo['splitfile1']);
+	
+	if($websiteInfo['split_downloads']) {
 		
+		$fileContents2 = file_get_contents($prevFolder.$downloadInfo['splitfile2']);
+		
+		if($fileContents !== false && $fileContents2 !== false) {
+			$fileContents .= $fileContents2;
+		}
+	
+	}
+	
+	if($blnShowDownload) {
+
 		$numOfHits = $downloadObj->get_info("downloadcount")+1;
 		$downloadObj->update(array("downloadcount"), array($numOfHits));
 		
 		header("Content-Description: File Transfer");
 		header("Content-Length: ".$downloadInfo['filesize'].";");
-		header("Content-disposition: attachment; filename=".$downloadInfo['filename']);
-		header("Content-type: ".$downloadInfo['mimetype']);
-
-		echo $fileContents1.$fileContents2;
-		
+		header("Content-Type: application/force-download");
+		header("Content-Type: application/octet-stream");
+		header("Content-Type: application/download");
+		//header("Content-Type: text/plain");//".$downloadInfo['mimetype']);
+		header("Content-Disposition: attachment; filename=".$downloadInfo['filename']);
+	
+		echo $fileContents;
 	}
 	else {
 		echo "File Not Found!";
 	}
-
+	
 }
 
 

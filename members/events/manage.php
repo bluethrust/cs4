@@ -82,19 +82,20 @@ if($LOGIN_FAIL) {
 $_SESSION['btEventID'] = "";
 $prevFolder = "../../";
 $PAGE_NAME = $consoleTitle." - ";
-$dispBreadCrumb = "<a href='".$MAIN_ROOT."'>Home</a> > <a href='".$MAIN_ROOT."members'>My Account</a> > ".$consoleTitle;
+
 $EXTERNAL_JAVASCRIPT .= "
 <script type='text/javascript' src='".$MAIN_ROOT."members/js/console.js'></script>
 <script type='text/javascript' src='".$MAIN_ROOT."members/js/main.js'></script>
 ";
 
 include("../../themes/".$THEME."/_header.php");
-echo "
-<div class='breadCrumbTitle' id='breadCrumbTitle'>$consoleTitle</div>
-<div class='breadCrumb' id='breadCrumb' style='padding-top: 0px; margin-top: 0px'>
-$dispBreadCrumb
-</div>
-";
+
+$breadcrumbObj->setTitle($consoleTitle);
+$breadcrumbObj->addCrumb("Home", MAIN_ROOT);
+$breadcrumbObj->addCrumb("My Account", MAIN_ROOT."members");
+$breadcrumbObj->addCrumb($consoleTitle);
+include($prevFolder."include/breadcrumb.php");
+
 
 if($blnShowPage) {
 	
@@ -124,6 +125,9 @@ if($blnShowPage) {
 			break;
 		case "editinfo":
 			include("editinfo.php");
+			break;
+		case "setattendance":
+			include("setattendance.php");
 			break;
 		case "chat":
 			include("chat.php");

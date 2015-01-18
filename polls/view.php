@@ -148,6 +148,7 @@ elseif($pollInfo['accesstype'] == "memberslimited") {
 
 <div class='pollContainer'>
 	<div id='pollPieChart' class='pollChart'></div>
+
 	<div class='pollLegend'>
 		<b>Legend:</b><br><br>
 		<?php 
@@ -162,7 +163,7 @@ elseif($pollInfo['accesstype'] == "memberslimited") {
 			
 		?>	
 	</div>
-	<div style='clear: both'></div>
+
 </div>
 
 <div class='pollInfoWrapper'>

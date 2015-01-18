@@ -1,3 +1,5 @@
+<?php header('Content-Type: text/html; charset=ISO-8859-15'); ?>
+
 <?php
 
 /*
@@ -37,28 +39,26 @@ $squadObj = new Squad($mysqli);
 $arrSquadPrivileges = $squadObj->arrSquadPrivileges;
 
 
+if($squadObj->select($_POST['sID'])) {	
+	$squadInfo = $squadObj->get_info();
+}
+
 if($member->authorizeLogin($_SESSION['btPassword']) && $member->hasAccess($consoleObj)) {
 	$LOGIN_FAIL = false;
 	$memberInfo = $member->get_info_filtered();
 
-	if($squadObj->select($_POST['sID'])) {
-		
-		$squadInfo = $squadObj->get_info();
-		
-		if($squadObj->memberHasAccess($memberInfo['member_id'], "manageshoutbox")) {
-			$blnManageShoutbox = true;
-		}
-				
+	if($squadObj->memberHasAccess($memberInfo['member_id'], "manageshoutbox")) {
+		$blnManageShoutbox = true;
 	}
 }
 
 
 $squadMemberList = $squadObj->getMemberList();
 $blnShowShoutBox = false;
-if(in_array($memberInfo['member_id'], $squadMemberList) && $squadInfo['privateshoutbox'] == 1) {
+if((in_array($memberInfo['member_id'], $squadMemberList) && $squadInfo['privateshoutbox'] == 1) || $memberInfo['rank_id'] == 1) {
 	$blnShowShoutBox = true;
 }
-elseif($squadInfo['privateshoutbox'] == 0) {
+elseif(isset($squadInfo['privateshoutbox']) && $squadInfo['privateshoutbox'] == 0) {
 	$blnShowShoutBox = true;
 }
 
@@ -82,7 +82,7 @@ if($blnShowShoutBox) {
 
 }
 else {
-	echo "no";	
+	echo "<p align='center'><i>You must be in this squad to view the shoutbox.</i></p>";	
 }
 
 

@@ -39,6 +39,7 @@
 	echo "
 	
 		<table class='formTable' style='border-spacing: 0px; margin-top: 0px'>
+
 	";
 
 		$counter = 0;

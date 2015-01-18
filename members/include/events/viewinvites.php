@@ -35,7 +35,7 @@ $eventObj = new Event($mysqli);
 if(isset($_GET['note'])) {
 	echo "
 		<div class='formDiv'>
-			<b><u>NOTE:</u></b> If you are here after clicking the confirm your attendence link, you must wait for the event to start before confirming your attendence at the event.  You can however, RSVP to an event from this page.
+			<b><u>NOTE:</u></b> If you are here after clicking the confirm your attendance link, you must wait for the event to start before confirming your attendance at the event.  You can however, RSVP to an event from this page.
 		</div>
 	";
 }

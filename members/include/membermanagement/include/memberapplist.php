@@ -42,6 +42,8 @@ $appComponentObj = $memberAppObj->objAppComponent;
 
 $memberAppForm = $memberAppObj->objSignUpForm;
 
+include_once(BASE_DIRECTORY."members/include/membermanagement/include/memberapp_setrank.php");
+
 $setupMemberAppForm = array(
 	"name" => "display-member-app",
 	"wrapper" => array("<div class='dottedBox' style='margin-top: 20px; width: 90%; margin-left: auto; margin-right: auto;'>", "</div>")
@@ -119,8 +121,16 @@ while($row = $result->fetch_assoc()) {
 		
 	}
 	
+	$setRankOptions = memberAppSetRank();
+	
 	if($memberAppInfo['memberadded'] == 0) {
-		$memberAppOptions = "<a href='javascript:void(0)' onclick=\"acceptApp('".$memberAppInfo['memberapp_id']."')\"><b>Accept</b></a> - <a href='javascript:void(0)' onclick=\"declineApp('".$memberAppInfo['memberapp_id']."')\"><b>Decline</b></a>";
+		
+		$addJS = "";
+		if(count($setRankOptions) > 0) {
+			$addJS = ", $('#newRankID_".$memberAppInfo['memberapp_id']."').val()";	
+		}
+		
+		$memberAppOptions = "<a href='javascript:void(0)' onclick=\"acceptApp('".$memberAppInfo['memberapp_id']."'".$addJS.")\"><b>Accept</b></a> - <a href='javascript:void(0)' onclick=\"declineApp('".$memberAppInfo['memberapp_id']."')\"><b>Decline</b></a>";
 	}
 	else {
 		$memberAppOptions = "<span class='successFont' style='font-weight: bold'>Member Added!</span> - <a href='javascript:void(0)' onclick=\"removeApp('".$memberAppInfo['memberapp_id']."')\"><b>Remove</b></a>";
@@ -134,7 +144,7 @@ while($row = $result->fetch_assoc()) {
 	
 	);
 	
-	$arrComponents = array_merge($arrDefaultInfo, $arrCompInfo);
+	$arrComponents = array_merge($arrDefaultInfo, $arrCompInfo, $setRankOptions);
 	
 	$setupMemberAppForm['components'] = $arrComponents;
 	

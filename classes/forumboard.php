@@ -53,7 +53,11 @@ class ForumBoard extends BasicSort {
 		if($this->intTableKeyValue != "") {
 			$arrSubForums = $this->getSubForums();
 			
-			$result[] = $this->MySQL->query("DELETE FROM ".$this->MySQL->get_tablePrefix()."forum_post WHERE forumboard_id = '".$this->intTableKeyValue."'");	
+			$query = "SELECT forumtopic_id FROM ".$this->MySQL->get_tablePrefix()."forum_topic WHERE forumboard_id = '".$this->intTableKeyValue."'";
+			
+			$result[] = $this->MySQL->query("DELETE FROM ".$this->MySQL->get_tablePrefix()."forum_post WHERE forumtopic_id IN (".$query.")");
+			
+			
 			$result[] = $this->MySQL->query("DELETE FROM ".$this->MySQL->get_tablePrefix()."forum_topic WHERE forumboard_id = '".$this->intTableKeyValue."'");
 			$result[] = $this->MySQL->query("DELETE FROM ".$this->MySQL->get_tablePrefix()."forum_rankaccess WHERE board_id = '".$this->intTableKeyValue."'");
 			$result[] = $this->MySQL->query("DELETE FROM ".$this->MySQL->get_tablePrefix()."forum_memberaccess WHERE board_id = '".$this->intTableKeyValue."'");
@@ -293,11 +297,15 @@ class ForumBoard extends BasicSort {
 
 	
 	public function hasNewTopics($memberID) {
-		
+		global $websiteInfo;
 		$returnVal = false;
 		if($this->intTableKeyValue != "" && is_numeric($memberID)) {
 			
-			$checkTime = time()-(60*60*24*7); // Checking topics with last posts dated within the last week
+			$checkTime = 0;
+			if($websiteInfo['forum_newindicator'] != 0) {
+				$checkTime = time()-(60*60*24*$websiteInfo['forum_newindicator']);
+			}
+			
 			$arrNewTopics = array();
 			$result = $this->MySQL->query("SELECT ft.forumtopic_id FROM ".$this->MySQL->get_tablePrefix()."forum_topic ft, ".$this->MySQL->get_tablePrefix()."forum_post fp WHERE forumboard_id = '".$this->intTableKeyValue."' AND fp.forumpost_id = ft.lastpost_id AND fp.dateposted > '".$checkTime."'");
 			while($row = $result->fetch_assoc()) {
@@ -678,4 +686,18 @@ class ForumBoard extends BasicSort {
 		
 	}
 	
+	public function getLink($fullLink=false) {
+
+		$url = MAIN_ROOT."forum/viewboard.php?bID=".$this->intTableKeyValue;
+		
+		if($fullLink) {
+			
+			$linkHTML = "<a href='".$url."'>".$this->get_info_filtered("name")."</a>";
+			return $linkHTML;
+			
+		}
+		else {
+			return $url;
+		}
+	}
 }

@@ -275,15 +275,15 @@ $arrPostButtons = array(
 $arrComponents = array_merge($arrComponents, $arrPostButtons);
 
 $setupFormArgs = array(
-		"name" => "console-".$cID,
-		"components" => $arrComponents,
-		"description" => "",
-		"saveObject" => $boardObj->objPost,
-		"saveMessage" => "Successfully posted new ".$postActionWord."!",
-		"saveType" => "add",
-		"attributes" => array("action" => $MAIN_ROOT."members/console.php?cID=".$cID."&bID=".$_GET['bID'].$addToForm, "method" => "post", "enctype" => "multipart/form-data"),
-		"afterSave" => array("saveAdditionalPostData"),
-		"saveAdditional" => array("member_id" => $memberInfo['member_id'], "dateposted" => time())
+	"name" => "console-".$cID,
+	"components" => $arrComponents,
+	"description" => "",
+	"saveObject" => $boardObj->objPost,
+	"saveMessage" => "Successfully posted new ".$postActionWord."!",
+	"saveType" => "add",
+	"attributes" => array("action" => $MAIN_ROOT."members/console.php?cID=".$cID."&bID=".$_GET['bID'].$addToForm, "method" => "post", "enctype" => "multipart/form-data"),
+	"afterSave" => array("saveAdditionalPostData"),
+	"saveAdditional" => array("member_id" => $memberInfo['member_id'], "dateposted" => time())
 );
 
 
@@ -354,6 +354,7 @@ function saveAdditionalPostData() {
 		
 	}
 	
+	$boardObj->objPost->sendNotifications();
 	
 	$formObj->saveLink = $boardObj->objPost->getLink();
 	
@@ -370,7 +371,9 @@ function saveAdditionalPostData() {
 }
 
 function checkForAttachments() {
-	global $formObj, $mysqli, $blnCheckForumAttachments, $prevFolder;
+	global $formObj, $mysqli, $blnCheckForumAttachments, $prevFolder, $websiteInfo;
+	
+	
 	
 	$returnVal = false;
 	if($blnCheckForumAttachments) {
@@ -385,17 +388,21 @@ function checkForAttachments() {
 		for($i=1;$i<=$_POST['numofattachments'];$i++) {
 			
 			$tempPostName = "forumattachment_".$i;
+
 			if($_FILES[$tempPostName]['name'] != "" && $attachmentObj->uploadFile($_FILES[$tempPostName], $prevFolder."downloads/files/forumattachment/", $forumAttachmentCatID)) {
 
 				$splitFiles = $attachmentObj->getSplitNames();
 				$fileSize = $attachmentObj->getFileSize();
 				$mimeType = $attachmentObj->getMIMEType();
 				
-				$arrDLValues = array($forumAttachmentCatID, $memberInfo['member_id'], time(), $_FILES[$tempPostName]['name'], $mimeType, $fileSize, "downloads/files/forumattachment/".$splitFiles[0], "downloads/files/forumattachment/".$splitFiles[1]);
+				$splitFile2Name = ($websiteInfo['split_downloads']) ? "downloads/files/forumattachment/".$splitFiles[1] : "";
+				
+				$arrDLValues = array($forumAttachmentCatID, $memberInfo['member_id'], time(), $_FILES[$tempPostName]['name'], $mimeType, $fileSize, "downloads/files/forumattachment/".$splitFiles[0], $splitFile2Name);
 				
 				if($attachmentObj->addNew($arrDLColumns, $arrDLValues)) {
 					$arrDownloadID[] = $attachmentObj->get_info("download_id");
 				}
+
 			}
 			elseif($_FILES[$tempPostName]['name'] != "") {
 				$countErrors++;
@@ -409,5 +416,6 @@ function checkForAttachments() {
 
 	return $returnVal;
 }
+
 
 ?>

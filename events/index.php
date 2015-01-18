@@ -94,15 +94,17 @@ include($prevFolder."include/breadcrumb.php");
 					$objMember->select($eventInfo['member_id']);
 					
 					$dateTimeObj = new DateTime();
+					$dateTimeObj->setTimezone(new DateTimeZone("UTC"));
 					$dateTimeObj->setTimestamp($eventInfo['startdate']);
 					$includeTimezone = "";
 					
-					if($eventInfo['timezone'] != "") { 
+					$dispStartDate = $dateTimeObj->format("M j, Y g:i A");
+					if($eventInfo['timezone'] != "") {
 						$dateTimeObj->setTimezone(new DateTimeZone($eventInfo['timezone']));
 						$dispTimezone = $dateTimeObj->format(" T"); 
 					}
-					$dateTimeObj->setTimezone("UTC");
-					$dispStartDate = $dateTimeObj->format("M j, Y g:i A").$dispTimezone;
+					
+					$dispStartDate .= $dispTimezone;
 					
 					echo "
 					<tr>
