@@ -230,8 +230,8 @@ if($blnCheckForumAttachments) {
 			"type" => "custom",
 			"sortorder" => $i++,
 			"display_name" => "Attachments",
-			"html" => "<div class='formInput'><div id='attachmentsDiv' style='margin-bottom: 10px'>
-							<input type='file' name='forumattachment_1' class='textBox' style='border: 0px'>
+			"html" => "<div id='attachmentsDiv' style='margin-bottom: 10px'>
+							<input type='file' name='forumattachment_1' style='border: 0px'>
 						</div>
 						<a href='javascript:void(0)' id='addMoreAttachments'>Add More Attachments</a></div>
 						<input type='hidden' id='numOfAttachments' value='1' name='numofattachments'>"
@@ -300,7 +300,7 @@ echo "
 				
 				if(numOfAttachments <= ".ini_get("max_file_uploads").") {
 	
-					$('#attachmentsDiv').append(\"<br><input type='file' name='forumattachment_\"+numOfAttachments+\"' class='textBox' style='border: 0px'>\");
+					$('#attachmentsDiv').append(\"<br><input type='file' name='forumattachment_\"+numOfAttachments+\"' style='border: 0px'>\");
 					$('#numOfAttachments').val(numOfAttachments);
 				
 				}
